@@ -1,0 +1,154 @@
+How to: structure a C# project
+1. Create project-hosting directory:
+    ProjectName.Solution
+
+2. Create project and project testing directories in ProjectName.Solution:
+    ProjectName
+    ProjectName.Tests
+
+3.A Create MVC structure directories in project directory (ProjectName):
+    Models
+    Views
+    Controllers
+
+3.B Create MVC structure directories in project testing directory (ProjectName.Tests):
+    ModelTests
+    [ViewTests]
+    ControllerTests
+
+4.A Create .csproj files in project and project testing directories:
+    ProjectName.csproj (in ProjectName)
+    ProjectNameTests.csproj (in ProjectName.Tests)
+
+4.B Add project package compiling information to .csproj files (ProjectName.csproj):
+    <Project Sdk="Microsoft.Net.Sdk.Web">
+      <PropertyGroup>
+        <TargetFramework>netcoreapp1.1</TargetFramework>
+      </PropertyGroup>
+      <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore" Version="1.1.2"/>
+        <PackageReference Include="Microsoft.AspNetCore.Http" Version="1.1.2"/>
+        <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="1.1.3"/>
+      </ItemGroup>
+    </Project>
+
+4.C Add project package compiling information to .csproj files (ProjectNameTests.csproj):
+    <Project Sdk="Microsoft.Net.Sdk">
+      <PropertyGroup>
+        <TargetFramework>netcoreapp1.1</TargetFramework>
+      </PropertyGroup>
+      <ItemGroup>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0"/>
+        <PackageReference Include="MSTest.TestAdapter" Version="1.4"/>
+        <PackageReference Include="MSTest.TestFramework" Version="1.4"/>
+      </ItemGroup>
+      <ItemGroup>
+        <ProjectReference Include="..\ProjectName\ProjectName.csproj"/>
+      </ItemGroup>
+    </Project>
+
+5.A Create project compiling files in project directory:
+    Program.cs
+    Startup.cs
+
+5.B Add project compiling information to Program.cs:
+    using System;
+    using System.IO;
+    using Microsoft.AspNetCore.Hosting;
+
+    namespace ProjectName
+    {
+      public class Program
+      {
+        public static void Main(string[] args)
+        {
+          var host = new WebHostBuilder()
+            .UseKestrel()
+            .UseIISIntegration()
+            .UseContentRoot(Directory.GetCurrentDirectory())
+            .UseStartup<Startup>()
+            .Build();
+
+          host.Run();
+        }
+      }
+    }
+
+5.C Add project compiling information to Startup.cs:
+    using Microsoft.AspNetCore.Builder;
+    using Microsoft.AspNetCore.Hosting;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.DependencyInjection;
+
+    namespace ProjectName
+    {
+      public class Startup
+      {
+        public Startup(IHostingEnvironment env)
+        {
+          var builder = new ConfigurationBuilder()
+              .SetBasePath(env.ContentRootPath)
+              .AddEnvironmentVariables();
+          Configuration = builder.Build();
+        }
+
+        public IConfigurationRoot Configuration { get; }
+
+        public void ConfigureServices(IServiceCollection services)
+        {
+          services.AddMvc();
+        }
+
+        public void Configure(IApplicationBuilder app)
+        {
+          app.UseMvc(routes =>
+          {
+            routes.MapRoute(
+              name: "default",
+              template: "{controller=Home}/{action=Index}/{id?}");
+          });
+
+          app.Run(async (context) =>
+          {
+            await context.Response.WriteAsync("Something went wrong!");
+          });
+        }
+      }
+    }
+
+6. Create README and LICENSE files in project directory, and insert templates:
+    README.md
+    License
+
+7. Create .gitignore in the project-hosting directory and add directories to ignore (ProjectName.Solution):
+    .gitignore {
+      obj/
+      bin/
+    }
+
+8. Go to ProjectName.Tests directory and use terminal command "dotnet restore"
+
+9. Initialize Git and make first commit
+    git commit -m "initialize project"
+
+10. Start project
+
+
+How to build project:
+1. Build project specs using Behavior Driven Development standards:
+    | Behavior | Input | Output |
+    |----------|-------|--------|
+    | Example  |  Add  |New List|
+
+For steps 2 - 4, follow the MVC structure:
+2.A Build Model tests
+2.B Alongside Model tests, build Model methods
+
+3.A Build View tests (if needed)
+3.B Alongside View tests (if used), build View cshtml
+
+4.A Build Controller tests
+4.B Alongside Controller tests, build Controller routes
+
+5. Refactor and polish methods, views, and controllers as needed
